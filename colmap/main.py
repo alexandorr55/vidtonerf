@@ -29,7 +29,7 @@ def start_flask():
 def to_url(local_file_path: str):
     return base_url+local_file_path
 
-def run_full_sfm_pipeline(id,video_file_path, input_data_dir, output_data_dir): 
+def run_full_sfm_pipeline(id, output_data_dir): 
     #run colmap and save data to custom directory
     # Create output directory under data/output_data_dir/id
     # TODO: use library to fix filepath joining
@@ -39,13 +39,9 @@ def run_full_sfm_pipeline(id,video_file_path, input_data_dir, output_data_dir):
     Path(f"{output_path}").mkdir(parents=True, exist_ok=True)
 
 
-    #(1) vid_to_images.py
+    #(1) get stuff from web-server
+    #TODO: Make this work as intended
     imgs_folder = os.path.join(output_path, "imgs")
-    print(video_file_path)
-
-    split_video_into_frames(video_file_path, imgs_folder, 100)
-    # imgs are now in output_data_dir/id
-
 
     #(2) colmap_runner.py
     colmap_path = "/usr/local/bin/colmap"
@@ -94,14 +90,13 @@ def colmap_worker():
         print(f"Running New Job With ID: {id}")
         
         #TODO: Handle exceptions and enable steaming to make safer 
-        video = requests.get(job_data['file_path'], timeout=10)
+        images_or_something = requests.get(job_data['file_path'], timeout=10)
         print("Web server pinged")
-        video_file_path = f"{input_data_dir}{id}.mp4"
-        open(video_file_path,"wb").write(video.content)
-        print("Video downloaded")
+        
+        #TODO: Get json images from web server
         
         # RUNS COLMAP AND CONVERSION CODE
-        motion_data, imgs_folder = run_full_sfm_pipeline(id, video_file_path, input_data_dir, output_data_dir)
+        motion_data, imgs_folder = run_full_sfm_pipeline(id, output_data_dir)
 
         # create links to local data to serve
         for i,frame in enumerate(motion_data["frames"]):
