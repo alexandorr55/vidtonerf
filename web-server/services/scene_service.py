@@ -4,6 +4,7 @@ import json
 from models.scene import SceneManager, Video
 from services.queue_service import RabbitMQService
 from uuid import uuid4, UUID
+from video_to_images import split_video_into_frames
 from werkzeug.utils import secure_filename
 
 from pymongo import MongoClient
@@ -38,6 +39,12 @@ class ClientService:
         video = Video(video_file_path)
         self.manager.set_video(uuid, video)
 
+        ## TODO add following path into web sever
+        imgs_folder = "data/images"
+
+        # split video into images and store into imgs_folder
+        split_video_into_frames(video_file_path, imgs_folder, 100)
+        
         # create rabbitmq job for sfm
         #TODO
         self.rmqservice.publish_sfm_job(uuid, video)
