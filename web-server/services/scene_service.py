@@ -40,13 +40,19 @@ class ClientService:
         self.manager.set_video(uuid, video)
 
         ## TODO add following path into web sever
-        imgs_folder = "data/images"
+        imgs_folder = "data/raw/images"
+        os.makedirs(imgs_folder, exist_ok=True) 
+
+        #img_file_path = os.path.join(imgs_folder,uuid+".jpg")
 
         # split video into images and store into imgs_folder
-        split_video_into_frames(video_file_path, imgs_folder, 100)
+        split_video_into_frames(video_file_path, imgs_folder, 200)
+
+        # TODO convert images into most likely a "frame" object that publishes to 
+        # the rabbitmq queue
         
         # create rabbitmq job for sfm
-        #TODO
+        #TODO change this from publishing a video to publishing a set of images
         self.rmqservice.publish_sfm_job(uuid, video)
 
         return uuid
