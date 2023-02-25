@@ -34,7 +34,7 @@ def start_flask():
 def to_url(local_file_path: str):
     return base_url + local_file_path
 
-def run_full_sfm_pipeline(id, output_data_dir): 
+def run_full_sfm_pipeline(images_dir, id, output_data_dir): 
     #run colmap and save data to custom directory
     # Create output directory under data/output_data_dir/id
     # TODO: use library to fix filepath joining
@@ -44,12 +44,11 @@ def run_full_sfm_pipeline(id, output_data_dir):
     Path(f"{output_path}").mkdir(parents=True, exist_ok=True)
 
 
-    #(1) get stuff from web-server
-    ## Before, split_video_into_frames would run here
-    ## The frames would then be saved to output_data_dir/id
-    ## This has to take the images from that directory
-    #TODO: Make this get images from output_data_dir/id
-    imgs_folder = os.path.join(output_path, "imgs")
+    #(1) get images
+    ## earlier in colmap, we got something from web-server
+    ##TODO: find out what format the data is that we got from web-server
+    ##TODO: transform whatever we get from web-server into what colmap uses
+    imgs_folder = images_dir
 
     #(2) colmap_runner.py
     colmap_path = "/usr/local/bin/colmap"
@@ -76,9 +75,7 @@ def run_full_sfm_pipeline(id, output_data_dir):
 
 
 def colmap_worker():
-    input_data_dir = "data/inputs/"
     output_data_dir = "data/outputs/"
-    Path(f"{input_data_dir}").mkdir(parents=True, exist_ok=True)
     Path(f"{output_data_dir}").mkdir(parents=True, exist_ok=True)
 
     
@@ -101,15 +98,14 @@ def colmap_worker():
         print(f"Running New Job With ID: {id}")
 
         # TODO: Handle exceptions and enable steaming to make safer
-        video = requests.get(job_data["file_path"], timeout=10)
+        images_dir = requests.get(job_data["file_path"], timeout=10)
+        # TODO: Learn we requests.get "gets" us
         print("Web server pinged")
-        video_file_path = f"{input_data_dir}{id}.mp4"
-        open(video_file_path, "wb").write(video.content)
-        print("Video downloaded")
+        print("images downloaded")
 
         # RUNS COLMAP AND CONVERSION CODE
         motion_data, imgs_folder = run_full_sfm_pipeline(
-            id, video_file_path, input_data_dir, output_data_dir
+            images_dir, id, output_data_dir
         )
 
         # create links to local data to serve
