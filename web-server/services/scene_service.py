@@ -16,6 +16,7 @@ class ClientService:
         
         #self.queue = queue
 
+    # TODO No longer use video class
     def handle_incoming_video(self, video_file):
         # receive video and check for validity
         file_name = secure_filename(video_file.filename)
@@ -43,17 +44,16 @@ class ClientService:
         imgs_folder = "data/raw/images"
         os.makedirs(imgs_folder, exist_ok=True) 
 
-        #img_file_path = os.path.join(imgs_folder,uuid+".jpg")
+        img_file_path = os.path.join(imgs_folder,uuid+".jpg")
 
         # split video into images and store into imgs_folder
         split_video_into_frames(video_file_path, imgs_folder, 200)
 
-        # TODO convert images into most likely a "frame" object that publishes to 
-        # the rabbitmq queue
+
+        # TODO convert images into most likely a "frame" object
         
-        # create rabbitmq job for sfm
         #TODO change this from publishing a video to publishing a set of images
-        self.rmqservice.publish_sfm_job(uuid, video)
+        self.rmqservice.publish_img_job(uuid, video)
 
         return uuid
 

@@ -209,6 +209,8 @@ class SceneManager:
         self.collection = self.db["scenes"]
         self.upsert=True
     
+    # TODO x
+
     #TODO: define set update get and delete for each object 
     # adds scene to the collection replacing any existing scene with the same id
     def set_scene(self, _id: str, scene: Scene):

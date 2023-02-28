@@ -1,6 +1,6 @@
 
 import pika, os, logging
-from models.scene import Video, Sfm, Nerf, SceneManager
+from models.scene import Video, Sfm, Nerf, SceneManager, Frame
 import json
 from urllib.parse import urlparse
 import requests
@@ -51,6 +51,22 @@ class RabbitMQService:
         }
         json_job = json.dumps(job)
         self.channel.basic_publish(exchange='', routing_key='sfm-in', body=json_job)
+
+    # TODO finish publish img job ----------------------------------------------
+    def publish_img_job(self, id: str, img: Frame ):
+        """
+            publish_sfm_job publishes a new job to the _________
+        """
+        job = {
+            "id": id,
+            "file_path": self.to_url(img.file_path)
+        }
+        json_job = json.dumps(job)
+
+        # TODO add correct routing Key
+        self.channel.basic_publish(exchange='', routing_key='ROUTING KEY NEEDS TO BE ADDED', body=json_job)
+
+     # -------------------------------------------------------------------------   
            
     def publish_nerf_job(self, id: str, vid: Video, sfm: Sfm):
         """
